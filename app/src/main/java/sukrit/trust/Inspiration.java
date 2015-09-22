@@ -1,7 +1,6 @@
 package sukrit.trust;
+// Try
 
-
-import android.annotation.SuppressLint;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -28,37 +27,67 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Calendar;
 
-import uk.co.senab.photoview.PhotoViewAttacher;
-
-public class Inspiration extends BaseActivity {
+public class Inspiration extends BaseActivity implements View.OnClickListener{
 	private String[] navMenuTitles;
 	private TypedArray navMenuIcons;
     String mon = "";
     String dat = "";
+
+    private ImageView inspiration;
+    BitmapDrawable drawable;
+    Bitmap bitmap;
+
+    Button save, share;
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState)  {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.inspiration);
+
+        // Setting up the drawer.
 		navMenuTitles = getResources().getStringArray(R.array.nav_drawer_items);
-
-		navMenuIcons = getResources()
-				.obtainTypedArray(R.array.nav_drawer_icons);
-
+		navMenuIcons = getResources().obtainTypedArray(R.array.nav_drawer_icons);
 		set(navMenuTitles, navMenuIcons);
-        
+
+        // Clicking on Facebook link...
         final TextView textView = (TextView)findViewById(R.id.facebook);
-        final Button save = (Button)findViewById(R.id.save);
-        final Button share = (Button)findViewById(R.id.share);
-        Calendar c = Calendar.getInstance();
-        int month = c.get(Calendar.MONTH);
-        int date = c.get(Calendar.DATE);
-
-
         textView.setClickable(true);
         textView.setMovementMethod(LinkMovementMethod.getInstance());
         String text = "<a href='https://www.facebook.com/sukrit.org?ref=br_tf'>Like us on Facebook</a>";
         textView.setText(Html.fromHtml(text));
 
+        // Setting up the calendar to view correct date.
+        inspiration_calendar();
+
+        // Button Widgets...
+        save = (Button)findViewById(R.id.save);
+        save.setOnClickListener(this);
+
+        share = (Button)findViewById(R.id.share);
+        share.setOnClickListener(this);
+
+
+        // Image Widget...
+        inspiration = (ImageView)findViewById(R.id.inspiration);
+        final InputStream ims;
+
+        try {
+            //PhotoViewAttacher mAttacher;
+            ims = getAssets().open("Inspirations/"+mon+"/"+dat+".jpg");
+            Drawable d = Drawable.createFromStream(ims, null);
+            inspiration.setImageDrawable(d);
+
+            //mAttacher = new PhotoViewAttacher(mImage);
+            //mAttacher.update();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void inspiration_calendar(){
+
+        Calendar c = Calendar.getInstance();
+        int month = c.get(Calendar.MONTH);
+        int date = c.get(Calendar.DATE);
 
         String[] arr = {"January" , "February" , "March" , "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
@@ -157,28 +186,17 @@ public class Inspiration extends BaseActivity {
         }else if (date == 31){
             dat = arr_of_dates[30];
         }
+    }
+
+    @Override
+    public void onClick(View v) {
+        drawable = (BitmapDrawable) inspiration.getDrawable();
+        bitmap = drawable.getBitmap();
+
+        switch(v.getId()){
+            case R.id.save:
 
 
-        ImageView mImage = (ImageView)findViewById(R.id.imageView1);
-        final InputStream ims;
-
-        try {
-            PhotoViewAttacher mAttacher;
-            ims = getAssets().open("Inspirations/"+mon+"/"+dat+".jpg");
-            Drawable d = Drawable.createFromStream(ims, null);
-            mImage.setImageDrawable(d);
-            mAttacher = new PhotoViewAttacher(mImage);
-            mAttacher.update();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        BitmapDrawable drawable = (BitmapDrawable) mImage.getDrawable();
-        final Bitmap bitmap = drawable.getBitmap();
-        save.setOnClickListener(new View.OnClickListener() {
-
-            @SuppressLint("SdCardPath") @Override
-            public void onClick(View v) {
                 Toast.makeText(getApplicationContext(), "Image Saved To Gallery", Toast.LENGTH_LONG).show();
                 ContentValues values = new ContentValues();
                 values.put(Images.Media.DATE_ADDED, System.currentTimeMillis());
@@ -248,20 +266,10 @@ public class Inspiration extends BaseActivity {
                     }
                 }
 
+                break;
 
+            case R.id.share:
 
-
-
-
-
-            }
-        });
-
-
-        share.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
                 String pathofBmp = Images.Media.insertImage(getContentResolver(), bitmap, dat+"_"+mon, null);
                 Uri bmpUri = Uri.parse(pathofBmp);
                 final Intent emailIntent1 = new Intent(    android.content.Intent.ACTION_SEND);
@@ -269,27 +277,8 @@ public class Inspiration extends BaseActivity {
                 emailIntent1.putExtra(Intent.EXTRA_STREAM, bmpUri);
                 emailIntent1.setType("image/png");
                 startActivity(emailIntent1);
-            }
-        });
 
-
-
-        //webview.loadUrl("file:///android_asset/Inspirations/"+mon+"/"+dat+".jpg");
-        //		wallpaper.setOnClickListener(new View.OnClickListener() {
-        //
-        //			public void onClick(View v) {
-        //
-        //				WallpaperManager myWallpaperManager = WallpaperManager.getInstance(getApplicationContext());
-        //				try {
-        //					//InputStream ims = getAssets().open("eight.jpg");
-        //					InputStream ims = getAssets().open("Inspirations/"+mon+"/"+dat+".jpg");
-        //					myWallpaperManager.setStream(ims);
-        //					//myWallpaperManager.setResource(R.drawable.eight);
-        //				} catch (IOException e) {
-        //					e.printStackTrace();
-        //				}
-        //
-        //			}
-        //		});
+                break;
+        }
     }
 }
