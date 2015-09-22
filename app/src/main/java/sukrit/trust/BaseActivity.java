@@ -48,7 +48,7 @@ public class BaseActivity extends ActionBarActivity {
 		mTitle = mDrawerTitle = getTitle();
 
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        setDrawerLeftEdgeSize(this, mDrawerLayout, 1.0f);
+        setDrawerLeftEdgeSize(this, mDrawerLayout, 0.3f);
 		mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
 		navDrawerItems = new ArrayList<NavDrawerItem>();
